@@ -43,6 +43,7 @@ library(dlookr)
 library(MLmetrics)
 library(corrplot)
 library(caret)
+library(performance)
 ```
 
 ``` r
@@ -267,3 +268,393 @@ new_df %>% diagnose_outlier()
 ## EXPLORATORY DATA ANALYSIS
 
 ### UNIVARIATE ANALYSIS
+
+``` r
+# boxplot of TV 
+
+ggplot(new_df, aes(TV))+
+  geom_boxplot(fill="peachpuff") +
+  labs(title = "Distribution of TV ",
+       subtitle = "The boxplots shows that TV is normally distributed ") +
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-16-1.png)<!-- -->
+
+``` r
+# boxplot of Radio 
+
+ggplot(new_df, aes(Radio))+
+  geom_boxplot(fill="lavender") +
+  labs(title = "Distribution of Radio",
+       subtitle = "The boxplots shows that Radio is normally distributed ") +
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+
+``` r
+# boxplot of newspaper
+
+ggplot(new_df, aes(Newspaper))+
+  geom_boxplot(fill="palegreen") +
+  labs(title = "Distribution of newspaper ",
+       subtitle = "The boxplots shows that newspaper is positively skewed ") +
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+
+``` r
+# boxplot of sales
+
+ggplot(new_df, aes(Sales))+
+  geom_boxplot(fill="azure") +
+  labs(title = "Distribution of Sales ",
+       subtitle = "The boxplots shows that Sales is normally distributed ") +
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-19-1.png)<!-- -->
+
+### BIVARIATE ANALYSIS
+
+``` r
+# Sales vs TV 
+
+ggplot(new_df, aes(Sales, TV)) +
+  geom_point(color="red") +
+  labs(title = "Sales Vs TV",
+       subtitle = "There is evidence of a linear relationship between sales and tv spending") + 
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-20-1.png)<!-- -->
+
+``` r
+# Sales vs Radio
+
+ggplot(new_df, aes(Sales, Radio)) +
+  geom_point(color="red") +
+  labs(title = "Sales Vs Radio",
+       subtitle = "There is evidence of some linear relationship between sales and Radio spending") + 
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+``` r
+# Sales vs Newspaper
+
+ggplot(new_df, aes(Sales, Newspaper)) +
+  geom_point(color="red") +
+  labs(title = "Sales Vs Newspaper",
+       subtitle = "There is evidence of little or no linear relationship between sales and newspaper spending") + 
+  theme_minimal()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+### MULTIVARIATE ANALYSIS
+
+For multivariate analysis, correlations will be investigated.
+
+``` r
+M <- cor(new_df)
+corrplot(M, order = 'AOE', addCoef.col = 'black', tl.pos = 'd',
+         cl.pos = 'n', col = COL2('PiYG'))
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+From the plot, it is evident that Tv spending has the strongest positive
+correlation with sales with a correlation of 0.77. Other variables have
+moderate or weak positive correlations.
+
+Additionally, it can also be said that there are no alarming
+multicollinearity between the predictor variables.
+
+## MODELLING
+
+The modelling process will involve;
+
+- Splitting data to training and testing
+
+- Fitting an initial model with all the predictors
+
+- Removing non-significant predictor using the p-value and fitting a
+  second model
+
+- Adding some interaction terms and test if they significantly improve
+  the accuracy of the model
+
+- Checking model diagnostics for the final model
+
+``` r
+# splitting data to training and testing set
+
+split <- createDataPartition(new_df$Sales, p=0.8, list = FALSE)
+
+train_set <- df[split,]
+
+test_set <- df[-split,]
+```
+
+``` r
+# Fitting an initial model 
+
+initial_model <- lm(Sales ~., data = train_set)
+```
+
+``` r
+# Summary of the model
+
+summary(initial_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = Sales ~ ., data = train_set)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -4.4870 -0.8001  0.2575  1.0602  2.7744 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept) 2.934399   0.317179   9.252   <2e-16 ***
+    ## TV          0.043791   0.001404  31.199   <2e-16 ***
+    ## Radio       0.199221   0.008735  22.807   <2e-16 ***
+    ## Newspaper   0.001211   0.005862   0.207    0.837    
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.494 on 153 degrees of freedom
+    ## Multiple R-squared:  0.9159, Adjusted R-squared:  0.9143 
+    ## F-statistic: 555.5 on 3 and 153 DF,  p-value: < 2.2e-16
+
+`Newspaper` had a large p-value an indication that it is perphaps not a
+strong predictor of sales and will therefore be dropped from the model.
+
+``` r
+# second model with newspaper dropped
+
+second_model <- lm(Sales ~ TV + Radio, data = new_df)
+```
+
+``` r
+#summary of second model
+
+summary(second_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = Sales ~ TV + Radio, data = new_df)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -8.7817 -0.8890  0.3101  1.1857  2.7509 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept) 3.043363   0.302280   10.07   <2e-16 ***
+    ## TV          0.045263   0.001437   31.50   <2e-16 ***
+    ## Radio       0.184511   0.008251   22.36   <2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 1.685 on 191 degrees of freedom
+    ## Multiple R-squared:  0.8882, Adjusted R-squared:  0.8871 
+    ## F-statistic: 758.9 on 2 and 191 DF,  p-value: < 2.2e-16
+
+The hypothesis posits the potential interaction between radio and TV
+expenditures in driving sales. Consequently, an interaction term
+encompassing both radio and TV will be incorporated to examine the
+presence of such an interaction.
+
+``` r
+# interaction term model
+
+interaction_model <- lm(Sales ~ TV + Radio + TV*Radio, data = new_df)
+```
+
+``` r
+# summary of the model 
+
+summary(interaction_model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = Sales ~ TV + Radio + TV * Radio, data = new_df)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -6.2306 -0.4165  0.1796  0.5823  1.4837 
+    ## 
+    ## Coefficients:
+    ##              Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept) 6.776e+00  2.476e-01  27.367  < 2e-16 ***
+    ## TV          1.884e-02  1.513e-03  12.452  < 2e-16 ***
+    ## Radio       2.552e-02  8.990e-03   2.839  0.00501 ** 
+    ## TV:Radio    1.119e-03  5.434e-05  20.588  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.9397 on 190 degrees of freedom
+    ## Multiple R-squared:  0.9654, Adjusted R-squared:  0.9649 
+    ## F-statistic:  1767 on 3 and 190 DF,  p-value: < 2.2e-16
+
+As hypothesized, the interaction term between tv and radio is a
+significant confirming the interaction between radio and tv in
+influencing sales. Additionally, the R-squared improved from `88%` to
+`96%`.
+
+An anova test will be conducted to confirm if need the model with the
+interaction term is better than the model without the interaction term.
+
+``` r
+anova(second_model, interaction_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Model 1: Sales ~ TV + Radio
+    ## Model 2: Sales ~ TV + Radio + TV * Radio
+    ##   Res.Df    RSS Df Sum of Sq      F    Pr(>F)    
+    ## 1    191 542.06                                  
+    ## 2    190 167.78  1    374.28 423.85 < 2.2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+The Residual Sum of Squares (RSS) for Model 1 is 542.06, whereas for
+Model 2 it is 167.78. The change in Residual Sum of Squares (ΔRSS) is
+374.28. The F-statistic is 423.85, which indicates a highly significant
+improvement in model fit when including the interaction term. The
+p-value associated with the F-statistic is extremely low (Pr(\>F) \<
+2.2e-16), indicating strong evidence against the null hypothesis that
+the interaction term has no effect. Adding the interaction term (TV \*
+Radio) significantly improves the model’s ability to explain the
+variation in sales compared to the model without it. This suggests that
+there is likely an interaction between TV and Radio advertising
+expenditures in influencing sales.
+
+### MODEL DIAGNOSTICS FOR THE FINAL MODEL
+
+1.  `Heteroskedasticity`
+
+``` r
+# checking heteroskedasticity
+
+interaction_model %>% check_heteroscedasticity() %>% plot()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-32-1.png)<!-- -->
+
+From the residual plot, there seems to be little concern that model is
+suffering from `heteroskedasticity`
+
+2.  `Normality of residuals`
+
+``` r
+# checking for normality of residuals 
+
+interaction_model %>% check_normality() %>% plot()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-33-1.png)<!-- -->
+
+From the plot, the residuals are normally distributed
+
+``` r
+# check for influential observations
+
+interaction_model %>% check_outliers() %>% plot()
+```
+
+![](salesprediction_files/figure-gfm/unnamed-chunk-34-1.png)<!-- -->
+
+There is little concern that just a few observations would have a
+significant shift in the line of fit for the model.
+
+``` r
+# check for multicollinearity
+
+interaction_model %>% check_collinearity()
+```
+
+    ## # Check for Multicollinearity
+    ## 
+    ## Low Correlation
+    ## 
+    ##   Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+    ##     TV 3.56 [2.85, 4.55]         1.89      0.28     [0.22, 0.35]
+    ##  Radio 3.82 [3.04, 4.88]         1.95      0.26     [0.20, 0.33]
+    ## 
+    ## Moderate Correlation
+    ## 
+    ##      Term  VIF   VIF 95% CI Increased SE Tolerance Tolerance 95% CI
+    ##  TV:Radio 6.48 [5.07, 8.37]         2.54      0.15     [0.12, 0.20]
+
+There are no alarming signs that the model predictors have high
+correlations between themselves that would warrant any of them to be
+dropped from the model.
+
+### SAVING MODEL FOR USE IN SHINY APP
+
+``` r
+# saving model 
+
+write_rds(interaction_model, "salesmodel.rds")
+```
+
+### MODEL COEFFICIENTS INTREPRETATION
+
+- TV (0.01884): For every one unit increase in TV advertising
+  expenditure, we expect sales to increase by approximately 0.01884
+  units, holding other variables constant.
+
+- Radio (0.02552): For every one unit increase in Radio advertising
+  expenditure, we expect sales to increase by approximately 0.02552
+  units, holding other variables constant.
+
+- <TV:Radio> Interaction (0.001119): This coefficient represents the
+  additional effect on sales when both TV and Radio advertising
+  expenditures increase together by one unit. In this case, the
+  interaction term suggests a positive synergistic effect - that is, the
+  combined effect of TV and Radio advertising expenditures is greater
+  than the sum of their individual effects.
+
+## RECCOMMENDATIONS
+
+1.  **Optimize TV Advertising Expenditure**
+
+Given that a one-unit increase in TV advertising expenditure is
+associated with an approximate 0.01884-unit increase in sales (while
+holding other factors constant), consider allocating resources to
+optimize TV advertising strategies. Focus on channels, time slots, or
+programs that have shown effectiveness in driving sales.
+
+2.  **Leverage Radio Advertising**
+
+Increase efforts in radio advertising, as a one-unit increase in radio
+advertising expenditure is associated with an approximate 0.02552-unit
+increase in sales (while holding other factors constant). This channel
+has demonstrated a positive impact on sales and should continue to be
+part of the marketing strategy.
+
+3.  **Explore Synergistic Opportunities**
+
+Given the presence of a significant interaction effect between TV and
+Radio advertising, consider exploring synergistic advertising campaigns
+that utilize both TV and Radio together. This combination seems to have
+a positive, amplified effect on sales compared to using them
+individually.
+
+4.  **Monitor and Adjust Campaigns**
+
+Continuously monitor the performance of advertising campaigns and adjust
+strategies as needed. This may involve reallocating resources based on
+the effectiveness of each channel and considering the interplay between
+TV and Radio advertising.
