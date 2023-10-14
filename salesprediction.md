@@ -418,20 +418,20 @@ summary(initial_model)
     ## 
     ## Residuals:
     ##     Min      1Q  Median      3Q     Max 
-    ## -4.4870 -0.8001  0.2575  1.0602  2.7744 
+    ## -8.3468 -0.6119  0.2686  1.2739  2.6982 
     ## 
     ## Coefficients:
     ##             Estimate Std. Error t value Pr(>|t|)    
-    ## (Intercept) 2.934399   0.317179   9.252   <2e-16 ***
-    ## TV          0.043791   0.001404  31.199   <2e-16 ***
-    ## Radio       0.199221   0.008735  22.807   <2e-16 ***
-    ## Newspaper   0.001211   0.005862   0.207    0.837    
+    ## (Intercept) 2.954615   0.354944   8.324 4.42e-14 ***
+    ## TV          0.047425   0.001559  30.412  < 2e-16 ***
+    ## Radio       0.175399   0.010321  16.994  < 2e-16 ***
+    ## Newspaper   0.001516   0.006586   0.230    0.818    
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## Residual standard error: 1.494 on 153 degrees of freedom
-    ## Multiple R-squared:  0.9159, Adjusted R-squared:  0.9143 
-    ## F-statistic: 555.5 on 3 and 153 DF,  p-value: < 2.2e-16
+    ## Residual standard error: 1.7 on 153 degrees of freedom
+    ## Multiple R-squared:  0.9005, Adjusted R-squared:  0.8985 
+    ## F-statistic: 461.5 on 3 and 153 DF,  p-value: < 2.2e-16
 
 `Newspaper` had a large p-value an indication that it is perphaps not a
 strong predictor of sales and will therefore be dropped from the model.
@@ -600,6 +600,25 @@ interaction_model %>% check_collinearity()
 There are no alarming signs that the model predictors have high
 correlations between themselves that would warrant any of them to be
 dropped from the model.
+
+### EVALUATING THE MODEL ON A TEST SET
+
+``` r
+# predicted values for the test set
+
+y_pred <- predict(interaction_model, newdata = test_set)
+```
+
+``` r
+MLmetrics::MAE(y_pred, test_set$Sales)
+```
+
+    ## [1] 0.6546932
+
+The `Mean Absolute Error` of 0.83 is pretty impressive for the model as
+it means that the model is expected to make an error of outmost 0.83
+units when making predictions on sales. This is more than an impressive
+model and will be saved for use in the shiny app.
 
 ### SAVING MODEL FOR USE IN SHINY APP
 
