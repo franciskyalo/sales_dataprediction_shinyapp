@@ -6,7 +6,7 @@ library(tidyverse)
 # load the model
 model <- read_rds("salesmodel.rds")
 
-# Define UI for application that draws a histogram
+# Define UI for application 
 ui <- fluidPage(
   
   # Application title
