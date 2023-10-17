@@ -10,7 +10,7 @@ model <- read_rds("salesmodel.rds")
 ui <- fluidPage(
   
   # Application title
-  titlePanel("Sales Predictions"),
+  titlePanel("CogniSales:Your Sales Fortunetelling app🧙"),
   theme = shinytheme("sandstone"),
   # Sidebar layout
   sidebarLayout(
@@ -47,7 +47,7 @@ server <- function(input, output) {
     req(input$file1)
     df <- read.csv(input$file1$datapath, stringsAsFactors = TRUE)
     
-    df$predictions <-predict(model, newdata = df)
+    df$predicted_sales <-predict(model, newdata = df)
     return(df)
     
   })
