@@ -1,3 +1,6 @@
+![R Language](https://img.shields.io/badge/language-R-blue?logo=r&logoColor=white) ![RStudio](https://img.shields.io/badge/IDE-RStudio-blue?logo=rstudio&logoColor=white) ![R Shiny](https://img.shields.io/badge/R_Shiny-Web_Application_Framework-blue?logo=r&logoColor=white)
+
+
 # COGNISALES: A SHINY APP FOR PREDICTING SALES USING MACHINE LEARNING
 
 ![bandicam 2023-10-17 05-26-45-100 (1)](https://github.com/franciskyalo/sales_dataprediction_shinyapp/assets/94622826/d855835e-0776-4b16-9c60-30d668abf3e7)
