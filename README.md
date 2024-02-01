@@ -50,7 +50,7 @@ Exploit the significant interaction effect observed between TV and Radio adverti
 4. Dynamic Campaign Monitoring and Adjustment:
 Maintain a vigilant eye on the performance of advertising initiatives and be prepared to adapt strategies accordingly. This may involve reallocating resources based on channel effectiveness and taking into account the collaborative influence of TV and Radio advertising.
 
-## Deployment of the model as a shiny app.
+## Deployment of the model as a shiny app.🚀
 
 The model will be deployed a shiny app as **shown by the gif above**.This app is designed to facilitate sales predictions based on a pre-loaded model. Here's a brief overview of how the app works:
 
